@@ -182,37 +182,15 @@ const String menuHeadings[menuLength] = {
   "Note Display"
   };
 
-int test1() {
+void test1() {
   display.print("prntfn1");
-  return 0;
 }
 
-int test2() {
-  display.print("prntfn1");
-  return 1;
+void test2() {
+  display.print("prnt fn 2");
 }
-int n;
-void thing(int x){
-  // This apparently needs to be inside a function 
-  // Doesn't work without 'void thing('
-  int (*(functions[2]))() = {test1, test2};
-  n = functions[0]();
-}
-//printf("%d\n", n);
 
-// typedef void (* PrintFuncs)(int i);
-// 
-// void functionOne(int value){display.print("prntfn1");}
-// void functionTwo(int value){display.print("prntfn2");}
-// void functionThr(int value){display.print("prntfn3");}
-// void functionFou(int value){display.print("prntfn4");}
-// static PrintFuncs voidFuncs[] =
-// {
-//     functionOne,
-//     functionTwo,
-//     functionThr,
-//     functionFou,
-// };
+void (*(functions[menuLength]))() = {test1, test2, test1, test2};
 
 void displayMainMenu(){
 
@@ -242,10 +220,8 @@ void displayMainMenu(){
     for (int i = 0; i <= 2; i++) {
       display.setCursor(10, (i+1)*8);
       menuItemIndex = (menuItem+i-1+menuLength) % menuLength;
-      // display.print(menuHeadings[menuItemIndex]);
-      // PrintFuncs[](2);
-      // n = functions[0]();
-      thing(2);
+      display.print(menuHeadings[menuItemIndex]);
+      // functions[i]();
       // display.print(((i-1) % menuLength));
     }
   }
