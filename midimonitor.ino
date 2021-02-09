@@ -189,8 +189,17 @@ void test1() {
 void test2() {
   display.print("prnt fn 2");
 }
+void handleMidiChannelSelectEncoderValue() {
+  midiChannelSelect += value;
+  displayMidiChannelMenu();
+}
 
-void (*(functions[menuLength]))() = {test1, test2, test1, test2};
+void (*(handleEncoderValueFns[menuLength]))() = {
+  test1,
+  test2,
+  handleMidiChannelSelectEncoderValue,
+  test2
+  };
 
 void displayMainMenu(){
 
@@ -221,7 +230,6 @@ void displayMainMenu(){
       display.setCursor(10, (i+1)*8);
       menuItemIndex = (menuItem+i-1+menuLength) % menuLength;
       display.print(menuHeadings[menuItemIndex]);
-      // functions[i]();
       // display.print(((i-1) % menuLength));
     }
   }
@@ -277,8 +285,7 @@ void handelEncoderInput() {
       displayMainMenu();
     } else {
       // put this in a function array
-      midiChannelSelect += value;
-      displayMidiChannelMenu();
+      handleEncoderValueFns[menuItem]();
     }
 
   }
