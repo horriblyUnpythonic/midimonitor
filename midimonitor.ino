@@ -37,6 +37,108 @@ void timerIsr() {
 
 int16_t midiChannels;
 
+
+//class StringName{
+//    public:
+//        StringName(const String &var): mem_var(var){}
+//        String mem_var;
+//};
+//StringName MidiChannelSelectMenu("sdf");
+
+//class CharName{
+//    public:
+//        CharName(const char var[]): mem_var(var){}
+//        char mem_var;
+//};
+//CharName name("Sample Text");
+
+//class Number{
+//    public:
+//        Number(int var): mem_var(var){}
+//        byte mem_var;
+//};
+//Number numberInstance(1231);
+
+
+// Base class
+class MenuItem {
+  public:
+    //MenuItem(char x){name=x;}
+    //MenuItem(String x)
+    //  : name(x)
+    //  {}
+    //String name;
+
+    //MenuItem(const char var[]): name(var){}
+    //MenuItem(char* &var): name(var){} // Don't know what & does
+    MenuItem(char* var): name(var){}
+    char *name;
+
+    void displayBody() {
+      display.setCursor(10, 10);
+      display.print("No Menu To Display");
+    }
+
+    void displayTitle() {
+      display.setCursor(0, 0);
+      //display.print(getName());
+      display.print(name);
+    }
+    void displayMenu() {
+      display.clearDisplay();
+      displayTitle();
+      displayBody();
+      display.display();
+    }
+
+  protected:
+    int someProtectedthing = 0;
+};
+
+//char* debugPointerString = "char pointer thing";
+//char debugArrayString[] = "char array thing";
+
+MenuItem MidiChannelSelectMenu("Midi Channel Select");
+MenuItem FakeMenu1("Fake, the first");
+MenuItem FakeMenu2("Fake menu 2");
+MenuItem FakeMenu3("u know it don't exi");
+
+
+//class MidiChannelSelectMenu: public MenuItem {
+//  public:
+//    String getName() {return "Midi Channel Select";};
+//    void displayBody() {
+//      display.setCursor(10, 10);
+//      display.print(" do the midi thing");
+//    }
+//};
+//class FakeMenu1: public MenuItem {
+//  public:
+//    String getName() {return "Fake, the first";};
+//    void displayBody() {
+//      display.setCursor(10, 10);
+//      display.print(" do the fake thing");
+//    }
+//};
+//class FakeMenu2: public MenuItem {
+//  public:
+//    String getName() {return "Fake menu 2";};
+//    void displayBody() {
+//      display.setCursor(10, 10);
+//      display.print(" do the two thing");
+//    }
+//};
+//class FakeMenu3: public MenuItem {
+//  public:
+//    String getName() {return "u know it don't exist";};
+//    void displayBody() {
+//      display.setCursor(10, 10);
+//      display.print(" do the don't exist thing");
+//    }
+//};
+
+
+
 void displayMidiChannelMenu() {
 
   display.clearDisplay();
@@ -97,7 +199,7 @@ void MyHandleNoteOn(byte channel, byte pitch, byte velocity) {
   note = pitch;
 
   digitalWrite(LED, HIGH); //Turn LED on
-  
+
   const String colour[4] = { "Bnhjkh", "R", "O", "Y"};
   String new_note = colour[note];
 
@@ -105,7 +207,7 @@ void MyHandleNoteOn(byte channel, byte pitch, byte velocity) {
 
     leds[note % 8] = CRGB(255, 100, 100);
     FastLED.show();
-    
+
     display.clearDisplay();
 //    last = value;
     display.setCursor(10, 1);
@@ -182,6 +284,13 @@ const String menuHeadings[menuLength] = {
   "Note Display"
   };
 
+const MenuItem menuObjects[menuLength] = {
+  MidiChannelSelectMenu,
+  FakeMenu1,
+  FakeMenu2,
+  FakeMenu3,
+};
+
 void test1() {
   display.print("prntfn1");
 }
@@ -199,7 +308,7 @@ void (*(handleEncoderValueFns[menuLength]))() = {
   test2,
   handleMidiChannelSelectEncoderValue,
   test2
-  };
+};
 
 void displayMainMenu(){
 
@@ -229,7 +338,8 @@ void displayMainMenu(){
     for (int i = 0; i <= 2; i++) {
       display.setCursor(10, (i+1)*8);
       menuItemIndex = (menuItem+i-1+menuLength) % menuLength;
-      display.print(menuHeadings[menuItemIndex]);
+      //display.print(menuHeadings[menuItemIndex]);
+      display.print(menuObjects[menuItemIndex].name);
       // display.print(((i-1) % menuLength));
     }
   }
