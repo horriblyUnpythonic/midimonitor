@@ -271,7 +271,7 @@ void testRGB() {
   //  }
 }
 
-byte menuItem, menuDepth;
+byte currentMenuIndex, currentMenuDepth;
 // byte lastMenuItem, lastMenuDepth;
 // bool anyMenuChanged, menuItemChanged, menuDepthChanged;
 const int menuLength = 4;
@@ -312,20 +312,20 @@ void (*(handleEncoderValueFns[menuLength]))() = {
 
 void displayMainMenu(){
 
-  // menuItemChanged = menuItem != lastMenuItem;
-  // menuDepthChanged = menuDepth != lastMenuDepth;
+  // menuItemChanged = currentMenuIndex != lastMenuItem;
+  // menuDepthChanged = currentMenuDepth != lastMenuDepth;
   // anyMenuChanged = menuItemChanged | menuDepthChanged;
   // if (anyMenuChanged) {
   //   return;
   // }
 
 
-  String menuString = menuHeadings[menuItem];
+  String menuString = menuHeadings[currentMenuIndex];
 
-  if (menuDepth > 0) {
+  if (currentMenuDepth > 0) {
     display.clearDisplay();
     display.setCursor(0, 0);
-    // display.print(menuHeadings[menuItem]);
+    // display.print(menuHeadings[currentMenuIndex]);
     display.print("Note Display");
   } else {
     display.clearDisplay();
@@ -337,7 +337,7 @@ void displayMainMenu(){
 
     for (int i = 0; i <= 2; i++) {
       display.setCursor(10, (i+1)*8);
-      menuItemIndex = (menuItem+i-1+menuLength) % menuLength;
+      menuItemIndex = (currentMenuIndex+i-1+menuLength) % menuLength;
       //display.print(menuHeadings[menuItemIndex]);
       display.print(menuObjects[menuItemIndex].name);
       // display.print(((i-1) % menuLength));
@@ -390,12 +390,12 @@ void handleAccelerationChange(){
 void handelEncoderInput() {
   value = encoder->getValue();
   if (value != 0){
-    if (menuDepth == 0){
-      menuItem += value;
+    if (currentMenuDepth == 0){
+      currentMenuIndex += value;
       displayMainMenu();
     } else {
       // put this in a function array
-      handleEncoderValueFns[menuItem]();
+      handleEncoderValueFns[currentMenuIndex]();
     }
 
   }
@@ -410,8 +410,8 @@ void handelEncoderInput() {
         VERBOSECASE(ClickEncoder::Held)
         VERBOSECASE(ClickEncoder::Released)
       case ClickEncoder::Clicked:
-        if (menuDepth == 0){
-          menuDepth = 1;
+        if (currentMenuDepth == 0){
+          currentMenuDepth = 1;
         } else if(true) {
           handleMidiChannelClick(); // TODO: put this in function array?
         }
@@ -427,8 +427,8 @@ void setup() {
   initializeOled();
 
   // Initialize Menu
-  menuItem = 0;
-  menuDepth = 0;
+  currentMenuIndex = 0;
+  currentMenuDepth = 0;
   displayMainMenu();
 
   FastLED.addLeds<WS2812, LED_STRIP_PIN, GRB>(leds, NUM_LEDS);
