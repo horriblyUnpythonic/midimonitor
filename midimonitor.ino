@@ -26,10 +26,11 @@ Adafruit_SSD1306 display(-1);
 
 
 ClickEncoder *encoder;
-int16_t value;
+int16_t encoderIncrement;
 int16_t last, midiChannelSelect;
 byte lastNote, note;
 
+byte currentMenuIndex, currentMenuDepth;
 
 void timerIsr() {
   encoder->service();
@@ -60,6 +61,18 @@ int16_t midiChannels;
 //Number numberInstance(1231);
 
 
+// typedef function<double(double,double)> myFunctionType
+//typedef int myFunctionType;
+//typedef void signal_handler(int);
+//void bar() {}
+//signal_handler foo(int whatever) {
+//    //return bar();
+//    //return [a](int a) {};
+//    return void *
+//}
+
+
+
 // Base class
 class MenuItem {
   public:
@@ -71,17 +84,30 @@ class MenuItem {
 
     //MenuItem(const char var[]): name(var){}
     //MenuItem(char* &var): name(var){} // Don't know what & does
+    //MenuItem(void fn): fo(var){}
     MenuItem(char* var): name(var){}
+    //MenuItem(char* var) {
+    //  dummyVal = 3;
+    //  name = var;
+    //}
+    //MenuItem(byte len) {
+    //  dummyVal = len;
+    //  name = "byte const";
+    //}
     char *name;
+    byte dummyVal = 0;
 
     void displayBody() {
       display.setCursor(10, 10);
       display.print("No Menu To Display");
+      display.setCursor(10, 20);
+      display.print(dummyVal);
+      //int a = 1;
+      //[a](int a) {display.clearDisplay();  };
     }
 
     void displayTitle() {
       display.setCursor(0, 0);
-      //display.print(getName());
       display.print(name);
     }
     void displayMenu() {
@@ -89,6 +115,14 @@ class MenuItem {
       displayTitle();
       displayBody();
       display.display();
+    }
+    void handleSingleClick() {
+      currentMenuDepth = 0;
+      displayMainMenu();
+    }
+    void handleValueChange(int16_t updateVal) {
+      dummyVal += updateVal;
+      displayMenu();
     }
 
   protected:
@@ -102,6 +136,8 @@ MenuItem MidiChannelSelectMenu("Midi Channel Select");
 MenuItem FakeMenu1("Fake, the first");
 MenuItem FakeMenu2("Fake menu 2");
 MenuItem FakeMenu3("u know it don't exi");
+//double d = 24;
+//MenuItem FakeMenu3(d);
 
 
 //class MidiChannelSelectMenu: public MenuItem {
@@ -271,7 +307,6 @@ void testRGB() {
   //  }
 }
 
-byte currentMenuIndex, currentMenuDepth;
 // byte lastMenuItem, lastMenuDepth;
 // bool anyMenuChanged, menuItemChanged, menuDepthChanged;
 const int menuLength = 4;
@@ -299,7 +334,7 @@ void test2() {
   display.print("prnt fn 2");
 }
 void handleMidiChannelSelectEncoderValue() {
-  midiChannelSelect += value;
+  // midiChannelSelect += value;  // (removed 'value' as var name)
   displayMidiChannelMenu();
 }
 
@@ -388,16 +423,15 @@ void handleAccelerationChange(){
 
 
 void handelEncoderInput() {
-  value = encoder->getValue();
-  if (value != 0){
+  encoderIncrement = encoder->getValue();
+  if (encoderIncrement != 0){
     if (currentMenuDepth == 0){
-      currentMenuIndex += value;
+      currentMenuIndex += encoderIncrement;
+      currentMenuIndex %= menuLength;
       displayMainMenu();
     } else {
-      // put this in a function array
-      handleEncoderValueFns[currentMenuIndex]();
+      menuObjects[currentMenuIndex].handleValueChange(encoderIncrement);
     }
-
   }
 
 
@@ -412,8 +446,10 @@ void handelEncoderInput() {
       case ClickEncoder::Clicked:
         if (currentMenuDepth == 0){
           currentMenuDepth = 1;
+          menuObjects[currentMenuIndex].displayMenu();
         } else if(true) {
-          handleMidiChannelClick(); // TODO: put this in function array?
+          // handleMidiChannelClick(); // TODO: put this in function array?
+          menuObjects[currentMenuIndex].handleSingleClick();
         }
         break;
       case ClickEncoder::DoubleClicked:
