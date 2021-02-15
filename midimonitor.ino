@@ -97,7 +97,7 @@ class MenuItem {
     char *name;
     byte dummyVal = 0;
 
-    void displayBody() {
+    virtual void displayBody() {
       display.setCursor(10, 10);
       display.print("No Menu To Display");
       display.setCursor(10, 20);
@@ -116,11 +116,12 @@ class MenuItem {
       displayBody();
       display.display();
     }
-    void handleSingleClick() {
+    virtual void handleSingleClick() {
       currentMenuDepth = 0;
       displayMainMenu();
     }
-    void handleValueChange(int16_t updateVal) {
+    //virtual void handleValueChange(int16_t updateVal) = 0;  // Makes abstract
+    virtual void handleValueChange(int16_t updateVal) {
       dummyVal += updateVal;
       displayMenu();
     }
@@ -129,10 +130,19 @@ class MenuItem {
     int someProtectedthing = 0;
 };
 
+class MidiMenu : public MenuItem {
+    public:
+    MidiMenu(char* var): MenuItem(var){}
+    void handleValueChange(int16_t updateVal) override {
+      dummyVal = 10;
+      displayMenu();
+    }
+};
+
 //char* debugPointerString = "char pointer thing";
 //char debugArrayString[] = "char array thing";
 
-MenuItem MidiChannelSelectMenu("Midi Channel Select");
+MidiMenu MidiChannelSelectMenu("Midi Channel Select");
 MenuItem FakeMenu1("Fake, the first");
 MenuItem FakeMenu2("Fake menu 2");
 MenuItem FakeMenu3("u know it don't exi");
@@ -319,11 +329,11 @@ const String menuHeadings[menuLength] = {
   "Note Display"
   };
 
-const MenuItem menuObjects[menuLength] = {
-  MidiChannelSelectMenu,
-  FakeMenu1,
-  FakeMenu2,
-  FakeMenu3,
+const MenuItem *menuObjects[menuLength] = {
+  &MidiChannelSelectMenu,
+  &FakeMenu1,
+  &FakeMenu2,
+  &FakeMenu3,
 };
 
 void test1() {
@@ -374,7 +384,7 @@ void displayMainMenu(){
       display.setCursor(10, (i+1)*8);
       menuItemIndex = (currentMenuIndex+i-1+menuLength) % menuLength;
       //display.print(menuHeadings[menuItemIndex]);
-      display.print(menuObjects[menuItemIndex].name);
+      display.print(menuObjects[menuItemIndex]->name);
       // display.print(((i-1) % menuLength));
     }
   }
@@ -430,7 +440,7 @@ void handelEncoderInput() {
       currentMenuIndex %= menuLength;
       displayMainMenu();
     } else {
-      menuObjects[currentMenuIndex].handleValueChange(encoderIncrement);
+      menuObjects[currentMenuIndex]->handleValueChange(encoderIncrement);
     }
   }
 
@@ -446,10 +456,10 @@ void handelEncoderInput() {
       case ClickEncoder::Clicked:
         if (currentMenuDepth == 0){
           currentMenuDepth = 1;
-          menuObjects[currentMenuIndex].displayMenu();
+          menuObjects[currentMenuIndex]->displayMenu();
         } else if(true) {
           // handleMidiChannelClick(); // TODO: put this in function array?
-          menuObjects[currentMenuIndex].handleSingleClick();
+          menuObjects[currentMenuIndex]->handleSingleClick();
         }
         break;
       case ClickEncoder::DoubleClicked:
