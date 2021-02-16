@@ -137,6 +137,10 @@ class MidiMenu : public MenuItem {
       midiChannelSelect += updateVal;
       displayMenu();
     }
+    void handleSingleClick(){
+      midiChannels = midiChannels ^ 1 << midiChannelSelect;
+      displayMenu();
+    }
 
     void displayBody() override {
 
@@ -336,7 +340,6 @@ void test1() {
 void (*(exampleOfFnArray[1]))() = {
   test1,
   //test2,
-  //handleMidiChannelSelectEncoderValue,
 };
 
 void displayMainMenu(){
@@ -389,10 +392,6 @@ void initializeOled() {
   display.display();
 }
 
-void handleMidiChannelClick(){
-  midiChannels = midiChannels ^ 1 << midiChannelSelect;
-  //displayMidiChannelMenu();
-}
 void handleAccelerationChange(){
 
   display.println("ClickEncoder::DoubleClicked");
@@ -429,7 +428,6 @@ void handelEncoderInput() {
           currentMenuDepth = 1;
           menuObjects[currentMenuIndex]->displayMenu();
         } else if(true) {
-          // handleMidiChannelClick(); // TODO: put this in function array?
           menuObjects[currentMenuIndex]->handleSingleClick();
         }
         break;
