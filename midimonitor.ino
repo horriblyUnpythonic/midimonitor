@@ -322,13 +322,6 @@ void testRGB() {
 const int menuLength = 4;
 byte menuItemIndex;
 
-const String menuHeadings[menuLength] = {
-  "Menu item 1",
-  "Menu item 2",
-  "Midi Channel Select",
-  "Note Display"
-  };
-
 const MenuItem *menuObjects[menuLength] = {
   &MidiChannelSelectMenu,
   &FakeMenu1,
@@ -355,13 +348,9 @@ void displayMainMenu(){
   //   return;
   // }
 
-
-  String menuString = menuHeadings[currentMenuIndex];
-
   if (currentMenuDepth > 0) {
     display.clearDisplay();
     display.setCursor(0, 0);
-    // display.print(menuHeadings[currentMenuIndex]);
     display.print("Note Display");
   } else {
     display.clearDisplay();
@@ -374,16 +363,9 @@ void displayMainMenu(){
     for (int i = 0; i <= 2; i++) {
       display.setCursor(10, (i+1)*8);
       menuItemIndex = (currentMenuIndex+i-1+menuLength) % menuLength;
-      //display.print(menuHeadings[menuItemIndex]);
       display.print(menuObjects[menuItemIndex]->name);
-      // display.print(((i-1) % menuLength));
     }
   }
-
-  //  display.setCursor(110, 0);
-  //  display.print(yyy);
-  //  display.setCursor(120, 0);
-  //  display.print(xxx);
 
   display.display();
 
@@ -403,8 +385,6 @@ void initializeOled() {
   // display a line of text
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  // display.setCursor(10,1);
-  // display.print("hello, world!");
 
   display.display();
 }
