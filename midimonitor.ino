@@ -134,8 +134,50 @@ class MidiMenu : public MenuItem {
     public:
     MidiMenu(char* var): MenuItem(var){}
     void handleValueChange(int16_t updateVal) override {
-      dummyVal = 10;
+      midiChannelSelect += updateVal;
       displayMenu();
+    }
+
+    void displayBody() override {
+
+      //display.clearDisplay();
+      //display.setCursor(0, 0);
+      //display.print("Midi Channel ");
+      bool xxx = midiChannels & midiChannelSelect;
+      //  display.print(midiChannels & value);
+      //  display.print(xxx);
+
+      int channelX;
+      int channelY;
+      int yyy;
+
+      for (int i = 1; i <= 16; i++) {
+        channelX = ((i - 1) % 8) * 16;
+        channelY = 8 + ((i - 1) / 8) * 15;
+        display.setCursor(channelX, channelY);
+        display.print(i);
+        yyy = midiChannels & (1 << (i - 1));
+        xxx = yyy;
+        if (i == midiChannelSelect) {
+          display.setCursor(110, 0);
+          display.print(yyy);
+          display.setCursor(120, 0);
+          display.print(xxx);
+        }
+        if (yyy) {
+          display.drawPixel(channelX + 2, channelY + 8, WHITE);
+        }
+      }
+
+      display.setCursor((midiChannelSelect * 16) % 128, 16 + 1);
+      if (midiChannelSelect < 8) {
+        display.print('^');
+      } else {
+        display.print('v');
+      }
+
+      //  display.print(encoder->getAccelerationEnabled() ? "on " : "off");
+      //display.display();
     }
 };
 
@@ -184,48 +226,6 @@ MenuItem FakeMenu3("u know it don't exi");
 //};
 
 
-
-void displayMidiChannelMenu() {
-
-  display.clearDisplay();
-  display.setCursor(0, 0);
-  display.print("Midi Channel ");
-  bool xxx = midiChannels & midiChannelSelect;
-  //  display.print(midiChannels & value);
-  //  display.print(xxx);
-
-  int channelX;
-  int channelY;
-  int yyy;
-
-  for (int i = 1; i <= 16; i++) {
-    channelX = ((i - 1) % 8) * 16;
-    channelY = 8 + ((i - 1) / 8) * 15;
-    display.setCursor(channelX, channelY);
-    display.print(i);
-    yyy = midiChannels & (1 << (i - 1));
-    xxx = yyy;
-    if (i == midiChannelSelect) {
-      display.setCursor(110, 0);
-      display.print(yyy);
-      display.setCursor(120, 0);
-      display.print(xxx);
-    }
-    if (yyy) {
-      display.drawPixel(channelX + 2, channelY + 8, WHITE);
-    }
-  }
-
-  display.setCursor((midiChannelSelect * 16) % 128, 16 + 1);
-  if (midiChannelSelect < 8) {
-    display.print('^');
-  } else {
-    display.print('v');
-  }
-
-  //  display.print(encoder->getAccelerationEnabled() ? "on " : "off");
-  display.display();
-}
 
 void displayAccelerationStatus() {
   display.clearDisplay();
@@ -340,19 +340,10 @@ void test1() {
   display.print("prntfn1");
 }
 
-void test2() {
-  display.print("prnt fn 2");
-}
-void handleMidiChannelSelectEncoderValue() {
-  // midiChannelSelect += value;  // (removed 'value' as var name)
-  displayMidiChannelMenu();
-}
-
-void (*(handleEncoderValueFns[menuLength]))() = {
+void (*(exampleOfFnArray[1]))() = {
   test1,
-  test2,
-  handleMidiChannelSelectEncoderValue,
-  test2
+  //test2,
+  //handleMidiChannelSelectEncoderValue,
 };
 
 void displayMainMenu(){
@@ -420,7 +411,7 @@ void initializeOled() {
 
 void handleMidiChannelClick(){
   midiChannels = midiChannels ^ 1 << midiChannelSelect;
-  displayMidiChannelMenu();
+  //displayMidiChannelMenu();
 }
 void handleAccelerationChange(){
 
