@@ -134,7 +134,8 @@ class MidiMenu : public MenuItem {
     public:
     MidiMenu(char* var): MenuItem(var){}
     void handleValueChange(int16_t updateVal) override {
-      midiChannelSelect += updateVal;
+      midiChannelSelect += updateVal + 16; // Extra 16 is to avoid negative numbers
+      midiChannelSelect %= 16;
       displayMenu();
     }
     void handleSingleClick(){
@@ -147,28 +148,24 @@ class MidiMenu : public MenuItem {
       //display.clearDisplay();
       //display.setCursor(0, 0);
       //display.print("Midi Channel ");
-      bool xxx = midiChannels & midiChannelSelect;
       //  display.print(midiChannels & value);
-      //  display.print(xxx);
 
       int channelX;
       int channelY;
-      int yyy;
+      bool thisMidiChannelisOn;
 
       for (int i = 1; i <= 16; i++) {
         channelX = ((i - 1) % 8) * 16;
         channelY = 8 + ((i - 1) / 8) * 15;
         display.setCursor(channelX, channelY);
         display.print(i);
-        yyy = midiChannels & (1 << (i - 1));
-        xxx = yyy;
-        if (i == midiChannelSelect) {
-          display.setCursor(110, 0);
-          display.print(yyy);
-          display.setCursor(120, 0);
-          display.print(xxx);
-        }
-        if (yyy) {
+        thisMidiChannelisOn = midiChannels & (1 << (i - 1));
+        // // Debug printing
+        // if (i == midiChannelSelect) {
+        //   display.setCursor(110, 0);
+        //   display.print(thisMidiChannelisOn);
+        // }
+        if (thisMidiChannelisOn) {
           display.drawPixel(channelX + 2, channelY + 8, WHITE);
         }
       }
@@ -465,7 +462,7 @@ void setup() {
   // Encoder init
   //  Serial.begin(9600);
   encoder = new ClickEncoder(A0, A2, A1, 4);
-  Timer1.initialize(1000);
+  Timer1.initialize(100);
   Timer1.attachInterrupt(timerIsr);
   last = -1;
 
@@ -482,7 +479,6 @@ void loop() {
   handelEncoderInput();
 
   // value += encoder->getValue();
-  midiChannelSelect %= 16;
 
   //  value += 1;
   //  if (value != last) {
