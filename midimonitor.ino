@@ -14,7 +14,7 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #define LED 13           // LED pin on Arduino Uno
 
 #define LED_STRIP_PIN 2
-#define NUM_LEDS 8
+#define NUM_LEDS 49
 
 CRGB leds[NUM_LEDS];
 
@@ -230,7 +230,6 @@ MenuItem FakeMenu3("u know it don't exi");
 //};
 
 
-
 void displayAccelerationStatus() {
   display.clearDisplay();
   display.setCursor(19, 1);
@@ -241,7 +240,7 @@ void displayAccelerationStatus() {
 void MyHandleNoteOff(byte channel, byte pitch, byte velocity) {
   digitalWrite(LED, LOW); //Turn LED off
   note = pitch;
-  leds[note % 8] = 0;
+  leds[note % NUM_LEDS] = 0;
   FastLED.show();
 }
 
@@ -255,7 +254,7 @@ void MyHandleNoteOn(byte channel, byte pitch, byte velocity) {
 
   if (note != lastNote) {
 
-    leds[note % 8] = CRGB(255, 100, 100);
+    leds[note % NUM_LEDS] = CRGB(255, 100, 100);
     FastLED.show();
 
     display.clearDisplay();
