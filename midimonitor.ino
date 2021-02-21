@@ -464,8 +464,8 @@ void setup() {
 
   // Encoder init
   //  Serial.begin(9600);
-  encoder = new ClickEncoder(A0, A2, A1);
-  Timer1.initialize(100);
+  encoder = new ClickEncoder(A0, A2, A1, 4);
+  Timer1.initialize(1000);
   Timer1.attachInterrupt(timerIsr);
   last = -1;
 
