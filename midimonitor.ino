@@ -31,6 +31,7 @@ int16_t last, midiChannelSelect;
 byte lastNote, note;
 
 byte currentMenuIndex, currentMenuDepth;
+byte ledBrightness = 12;
 
 void timerIsr() {
   encoder->service();
@@ -44,7 +45,7 @@ int16_t midiChannels;
 //        StringName(const String &var): mem_var(var){}
 //        String mem_var;
 //};
-//StringName MidiChannelSelectMenu("sdf");
+//StringName midiChannelSelectMenu("sdf");
 
 //class CharName{
 //    public:
@@ -181,19 +182,38 @@ class MidiMenu : public MenuItem {
       //display.display();
     }
 };
+class BrightnessMenu : public MenuItem {
+    public:
+    BrightnessMenu(char* var): MenuItem(var){}
+    void handleValueChange(int16_t updateVal) override {
+      ledBrightness += updateVal;
+      if(ledBrightness < 1) ledBrightness = 1;
+      if(ledBrightness > 15) ledBrightness = 15;
+      displayMenu();
+    }
+    //void handleSingleClick(){
+    //  midiChannels = midiChannels ^ 1 << midiChannelSelect;
+    //  displayMenu();
+    //}
+
+    void displayBody() override {
+      display.setCursor(10, 10);
+      display.print(ledBrightness);
+    }
+};
 
 //char* debugPointerString = "char pointer thing";
 //char debugArrayString[] = "char array thing";
 
-MidiMenu MidiChannelSelectMenu("Midi Channel Select");
-MenuItem FakeMenu1("Fake, the first");
+MidiMenu midiChannelSelectMenu("Midi Channel Select");
+BrightnessMenu brightnessMenu("Brightness");
 MenuItem FakeMenu2("Fake menu 2");
 MenuItem FakeMenu3("u know it don't exi");
 //double d = 24;
 //MenuItem FakeMenu3(d);
 
 
-//class MidiChannelSelectMenu: public MenuItem {
+//class midiChannelSelectMenu: public MenuItem {
 //  public:
 //    String getName() {return "Midi Channel Select";};
 //    void displayBody() {
@@ -242,25 +262,27 @@ void MyHandleNoteOff(byte channel, byte pitch, byte velocity) {
 }
 
 void MyHandleNoteOn(byte channel, byte pitch, byte velocity) {
-  note = pitch;
 
   digitalWrite(LED, HIGH); //Turn LED on
 
-  const String colour[4] = { "Bnhjkh", "R", "O", "Y"};
-  String new_note = colour[note];
+  // is this fine to have bool declaration inside this func?
+  bool thisMidiChannelisOn = midiChannels & (1 << (channel - 1));
 
-  if (note != lastNote) {
+  if (thisMidiChannelisOn) {
 
-    leds[note % NUM_LEDS] = CRGB(255, 100, 100);
+    leds[pitch % NUM_LEDS] = CRGB(
+    16*ledBrightness*((channel+0)%3),
+    16*ledBrightness*((channel+1)%3),
+    16*ledBrightness*((channel+2)%3)
+    );
     FastLED.show();
 
-    display.clearDisplay();
-//    last = value;
-    display.setCursor(10, 1);
-    display.print("Note Value: ");
-    //    display.println(new_note);
-
-    //  displayNoteValue(note, velocity);
+    ////TODO: move this to a menu
+    //display.clearDisplay();
+    ////last = value;
+    //display.setCursor(10, 1);
+    //display.print("Note Value: ");
+    ////  displayNoteValue(pitch, velocity);
   }
 
 }
@@ -300,7 +322,7 @@ void testRGB() {
   leds[0] = CRGB(255, 0, 0);
   leds[1] = CRGB(0, 255, 0);
   leds[2] = CRGB(0, 0, 255);
-  FastLED.setBrightness(12);
+  FastLED.setBrightness(ledBrightness);
   FastLED.show();
   //  for (int i=0; i<NUM_LEDS; i++){
   //    leds[i] = CRGB(0, 255 - 4*i, 4*i );
@@ -323,8 +345,8 @@ const int menuLength = 4;
 byte menuItemIndex;
 
 const MenuItem *menuObjects[menuLength] = {
-  &MidiChannelSelectMenu,
-  &FakeMenu1,
+  &midiChannelSelectMenu,
+  &brightnessMenu,
   &FakeMenu2,
   &FakeMenu3,
 };
@@ -445,7 +467,7 @@ void setup() {
   FastLED.addLeds<WS2812, LED_STRIP_PIN, GRB>(leds, NUM_LEDS);
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 10); // 500ma is probably the max?
   FastLED.clear();
-  FastLED.setBrightness(12); // TODO: make this a menu item
+  FastLED.setBrightness(ledBrightness); // TODO: make this a menu item
   FastLED.show();
 
 
